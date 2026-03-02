@@ -1,44 +1,75 @@
-import { afterEach, describe, expect, it } from "bun:test"
+import { afterEach, describe, expect, it, mock, spyOn } from "bun:test"
 import { startCallbackServer, type CallbackServer } from "./callback-server"
 
-const nativeFetch = Bun.fetch.bind(Bun)
+type ServeOptions = Parameters<typeof Bun.serve>[0]
+
+function createServeHarness(args?: { blockedPorts?: Set<number> }) {
+  let callbackFetch: ServeOptions["fetch"] | null = null
+  const stopMock = mock(() => {})
+
+  const serveSpy = spyOn(Bun, "serve").mockImplementation((options) => {
+    const blockedPorts = args?.blockedPorts ?? new Set<number>()
+    if (blockedPorts.has(options.port)) {
+      throw new Error("EADDRINUSE")
+    }
+
+    if (options.fetch.length > 0) {
+      callbackFetch = options.fetch
+      return {
+        stop: stopMock,
+      } as unknown as ReturnType<typeof Bun.serve>
+    }
+
+    return {
+      stop: mock(() => {}),
+    } as unknown as ReturnType<typeof Bun.serve>
+  })
+
+  const getCallbackFetch = () => {
+    if (!callbackFetch) {
+      throw new Error("callback fetch handler was not captured")
+    }
+    return callbackFetch
+  }
+
+  return {
+    serveSpy,
+    stopMock,
+    getCallbackFetch,
+  }
+}
 
 describe("startCallbackServer", () => {
   let server: CallbackServer | null = null
 
-  afterEach(async () => {
+  afterEach(() => {
     server?.close()
     server = null
-    // Allow time for port to be released before next test
-    await Bun.sleep(10)
+    mock.restore()
   })
 
   it("starts server and returns port", async () => {
-    // given - no preconditions
+    createServeHarness()
 
-    // when
-    server = await startCallbackServer()
+    server = await startCallbackServer(19877)
 
-    // then
-    expect(server.port).toBeGreaterThanOrEqual(19877)
+    expect(server.port).toBe(19877)
     expect(typeof server.waitForCallback).toBe("function")
     expect(typeof server.close).toBe("function")
   })
 
   it("resolves callback with code and state from query params", async () => {
-    // given
-    server = await startCallbackServer()
-    const callbackUrl = `http://127.0.0.1:${server.port}/oauth/callback?code=test-code&state=test-state`
+    const harness = createServeHarness()
+    server = await startCallbackServer(19877)
 
-    // when
-    // Use Promise.all to ensure fetch and waitForCallback run concurrently
-    // This prevents race condition where waitForCallback blocks before fetch starts
+    const callbackFetch = harness.getCallbackFetch()
+    const callbackRequest = new Request("http://127.0.0.1:19877/oauth/callback?code=test-code&state=test-state")
+
     const [result, response] = await Promise.all([
       server.waitForCallback(),
-      nativeFetch(callbackUrl)
+      callbackFetch(callbackRequest),
     ])
 
-    // then
     expect(result).toEqual({ code: "test-code", state: "test-state" })
     expect(response.status).toBe(200)
     const html = await response.text()
@@ -46,61 +77,58 @@ describe("startCallbackServer", () => {
   })
 
   it("returns 404 for non-callback routes", async () => {
-    // given
-    server = await startCallbackServer()
+    const harness = createServeHarness()
+    server = await startCallbackServer(19877)
 
-    // when
-    const response = await nativeFetch(`http://127.0.0.1:${server.port}/other`)
+    const callbackFetch = harness.getCallbackFetch()
+    const response = await callbackFetch(new Request("http://127.0.0.1:19877/other"))
 
-    // then
     expect(response.status).toBe(404)
   })
 
   it("returns 400 and rejects when code is missing", async () => {
-    // given
-    server = await startCallbackServer()
-    const callbackRejection = server.waitForCallback().catch((e: Error) => e)
+    const harness = createServeHarness()
+    server = await startCallbackServer(19877)
+    const callbackRejection = server.waitForCallback().catch((error: Error) => error)
 
-    // when
-    const response = await nativeFetch(`http://127.0.0.1:${server.port}/oauth/callback?state=s`)
+    const callbackFetch = harness.getCallbackFetch()
+    const response = await callbackFetch(new Request("http://127.0.0.1:19877/oauth/callback?state=s"))
 
-    // then
     expect(response.status).toBe(400)
     const error = await callbackRejection
     expect(error).toBeInstanceOf(Error)
-    expect((error as Error).message).toContain("missing code or state")
+    expect(error.message).toContain("missing code or state")
   })
 
   it("returns 400 and rejects when state is missing", async () => {
-    // given
-    server = await startCallbackServer()
-    const callbackRejection = server.waitForCallback().catch((e: Error) => e)
+    const harness = createServeHarness()
+    server = await startCallbackServer(19877)
+    const callbackRejection = server.waitForCallback().catch((error: Error) => error)
 
-    // when
-    const response = await nativeFetch(`http://127.0.0.1:${server.port}/oauth/callback?code=c`)
+    const callbackFetch = harness.getCallbackFetch()
+    const response = await callbackFetch(new Request("http://127.0.0.1:19877/oauth/callback?code=c"))
 
-    // then
     expect(response.status).toBe(400)
     const error = await callbackRejection
     expect(error).toBeInstanceOf(Error)
-    expect((error as Error).message).toContain("missing code or state")
+    expect(error.message).toContain("missing code or state")
   })
 
   it("close stops the server immediately", async () => {
-    // given
-    server = await startCallbackServer()
-    const port = server.port
+    const harness = createServeHarness()
+    server = await startCallbackServer(19877)
 
-    // when
     server.close()
     server = null
 
-    // then
-    try {
-      await nativeFetch(`http://127.0.0.1:${port}/oauth/callback?code=c&state=s`)
-      expect(true).toBe(false)
-    } catch (error) {
-      expect(error).toBeDefined()
-    }
+    expect(harness.stopMock).toHaveBeenCalled()
+  })
+
+  it("selects the next available port when preferred port is blocked", async () => {
+    createServeHarness({ blockedPorts: new Set([19877]) })
+
+    server = await startCallbackServer(19877)
+
+    expect(server.port).toBe(19878)
   })
 })
