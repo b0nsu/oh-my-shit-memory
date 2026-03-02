@@ -9,6 +9,7 @@ dist/
 # Platform binaries (built, not committed)
 packages/*/bin/oh-my-opencode
 packages/*/bin/oh-my-opencode.exe
+packages/*/bin/index.js.map
 
 # IDE
 .idea/
@@ -32,6 +33,8 @@ yarn.lock
 .env
 .env.local
 test-injection/
+.oh-my-shit-memory/
+.omx/
 notepad.md
 oauth-success.html
 *.bun-build

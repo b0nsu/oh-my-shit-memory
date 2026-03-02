@@ -25,6 +25,7 @@ import {
   createQuestionLabelTruncatorHook,
   createPreemptiveCompactionHook,
   createRuntimeFallbackHook,
+  createOhMyShitMemoryHook,
 } from "../../hooks"
 import { createAnthropicEffortHook } from "../../hooks/anthropic-effort"
 import {
@@ -60,6 +61,7 @@ export type SessionHooks = {
   taskResumeInfo: ReturnType<typeof createTaskResumeInfoHook> | null
   anthropicEffort: ReturnType<typeof createAnthropicEffortHook> | null
   runtimeFallback: ReturnType<typeof createRuntimeFallbackHook> | null
+  ohMyShitMemory: ReturnType<typeof createOhMyShitMemoryHook> | null
 }
 
 export function createSessionHooks(args: {
@@ -261,6 +263,11 @@ export function createSessionHooks(args: {
           pluginConfig,
         }))
     : null
+
+  const ohMyShitMemory = isHookEnabled("oh-my-shit-memory")
+    ? safeHook("oh-my-shit-memory", () => createOhMyShitMemoryHook(ctx, pluginConfig.oh_my_shit_memory))
+    : null
+
   return {
     contextWindowMonitor,
     preemptiveCompaction,
@@ -285,5 +292,6 @@ export function createSessionHooks(args: {
     taskResumeInfo,
     anthropicEffort,
     runtimeFallback,
+    ohMyShitMemory,
   }
 }

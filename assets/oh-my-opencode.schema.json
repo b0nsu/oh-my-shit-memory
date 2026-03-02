@@ -3698,6 +3698,56 @@
       },
       "additionalProperties": false
     },
+    "oh_my_shit_memory": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "sampling_interval_ms": {
+          "default": 1000,
+          "type": "integer",
+          "minimum": 250,
+          "maximum": 10000
+        },
+        "analysis_timeout_ms": {
+          "default": 120000,
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 120000
+        },
+        "max_incident_artifact_bytes": {
+          "default": 524288000,
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 524288000
+        },
+        "max_workflow_artifacts_bytes": {
+          "default": 2147483648,
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 2147483648
+        },
+        "monitor_memory_limit_bytes": {
+          "default": 104857600,
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 104857600
+        },
+        "artifact_dir": {
+          "type": "string",
+          "minLength": 1
+        },
+        "redacted_path_prefixes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "babysitting": {
       "type": "object",
       "properties": {

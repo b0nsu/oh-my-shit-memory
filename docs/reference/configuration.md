@@ -28,6 +28,7 @@ Complete reference for `oh-my-opencode.jsonc` configuration. This document cover
   - [Notification](#notification)
   - [MCPs](#mcps)
   - [LSP](#lsp)
+  - [oh-my-shit-memory](#oh-my-shit-memory)
 - [Advanced](#advanced)
   - [Runtime Fallback](#runtime-fallback)
   - [Hashline Edit](#hashline-edit)
@@ -405,7 +406,7 @@ Disable built-in hooks via `disabled_hooks`:
 { "disabled_hooks": ["comment-checker", "agent-usage-reminder"] }
 ```
 
-Available hooks: `todo-continuation-enforcer`, `context-window-monitor`, `session-recovery`, `session-notification`, `comment-checker`, `grep-output-truncator`, `tool-output-truncator`, `directory-agents-injector`, `directory-readme-injector`, `empty-task-response-detector`, `think-mode`, `anthropic-context-window-limit-recovery`, `rules-injector`, `background-notification`, `auto-update-checker`, `startup-toast`, `keyword-detector`, `agent-usage-reminder`, `non-interactive-env`, `interactive-bash-session`, `compaction-context-injector`, `thinking-block-validator`, `claude-code-hooks`, `ralph-loop`, `preemptive-compaction`, `auto-slash-command`, `sisyphus-junior-notepad`, `no-sisyphus-gpt`, `start-work`, `runtime-fallback`
+Available hooks: `todo-continuation-enforcer`, `context-window-monitor`, `session-recovery`, `session-notification`, `comment-checker`, `grep-output-truncator`, `tool-output-truncator`, `directory-agents-injector`, `directory-readme-injector`, `empty-task-response-detector`, `think-mode`, `anthropic-context-window-limit-recovery`, `rules-injector`, `background-notification`, `auto-update-checker`, `startup-toast`, `keyword-detector`, `agent-usage-reminder`, `non-interactive-env`, `interactive-bash-session`, `oh-my-shit-memory`, `compaction-context-injector`, `thinking-block-validator`, `claude-code-hooks`, `ralph-loop`, `preemptive-compaction`, `auto-slash-command`, `sisyphus-junior-notepad`, `no-sisyphus-gpt`, `start-work`, `runtime-fallback`
 
 **Notes:**
 - `directory-agents-injector` — auto-disabled on OpenCode 1.1.37+ (native AGENTS.md support)
@@ -421,6 +422,38 @@ Disable built-in commands via `disabled_commands`:
 ```
 
 Available commands: `init-deep`, `start-work`
+
+
+### oh-my-shit-memory
+
+Linux-first incident instrumentation for build/test flows.
+
+```jsonc
+{
+  "oh_my_shit_memory": {
+    "enabled": true,
+    "sampling_interval_ms": 1000,
+    "analysis_timeout_ms": 120000,
+    "max_incident_artifact_bytes": 524288000,
+    "max_workflow_artifacts_bytes": 2147483648,
+    "monitor_memory_limit_bytes": 104857600,
+    "artifact_dir": ".oh-my-shit-memory/incidents"
+  }
+}
+```
+
+| Option | Type | Default | Notes |
+|--------|------|---------|-------|
+| `enabled` | boolean | `true` | Enable runtime instrumentation wrappers/hooks |
+| `sampling_interval_ms` | number | `1000` | Min `250`, max `10000` |
+| `analysis_timeout_ms` | number | `120000` | Hard cap, analyzer fails open on timeout |
+| `max_incident_artifact_bytes` | number | `524288000` | Per-incident artifact bundle cap (500MB) |
+| `max_workflow_artifacts_bytes` | number | `2147483648` | Workflow artifact budget cap (2GB) |
+| `monitor_memory_limit_bytes` | number | `104857600` | Monitoring process memory budget (100MB) |
+| `artifact_dir` | string | `.oh-my-shit-memory/incidents` | Incident output root |
+| `redacted_path_prefixes` | string[] | `[]` | Additional path prefixes to mask |
+
+See also: [docs/guide/oh-my-shit-memory.md](../guide/oh-my-shit-memory.md).
 
 ### Browser Automation
 

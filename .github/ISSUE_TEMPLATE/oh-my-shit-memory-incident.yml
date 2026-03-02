@@ -1,0 +1,66 @@
+name: oh-my-shit-memory Incident
+about: Auto-generated runtime memory/crash incident from CI instrumentation
+title: "[oh-my-shit-memory] "
+labels: ["bug", "oh-my-shit-memory", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue is generated from the Linux-first oh-my-shit-memory incident pipeline.
+
+  - type: input
+    id: signature
+    attributes:
+      label: Incident Signature
+      description: Stable incident signature for 24h dedupe.
+      placeholder: 8f2c7e1a...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - critical
+        - high
+        - medium
+        - low
+    validations:
+      required: true
+
+  - type: input
+    id: repro-priority
+    attributes:
+      label: Repro Priority
+      description: Derived triage priority (p0/p1/p2)
+      placeholder: p0
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: CI/local environment details.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: artifacts
+    attributes:
+      label: Artifact Links
+      description: Include incident.json, incident.md, dump pointers, and symbol/build metadata.
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: actions
+    attributes:
+      label: Recommended Actions
+      description: Suggested mitigations from auto-analysis.
+      render: markdown
+    validations:
+      required: true

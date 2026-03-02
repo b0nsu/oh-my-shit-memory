@@ -9,6 +9,7 @@ import {
   GitMasterConfigSchema,
   HookNameSchema,
   OhMyOpenCodeConfigSchema,
+  OhMyShitMemoryConfigSchema,
 } from "./schema"
 
 describe("disabled_mcps schema", () => {
@@ -391,6 +392,24 @@ describe("BuiltinCategoryNameSchema", () => {
       const result = BuiltinCategoryNameSchema.safeParse(cat)
       expect(result.success).toBe(true)
     }
+  })
+})
+
+
+describe("OhMyShitMemoryConfigSchema", () => {
+  test("accepts default-friendly config", () => {
+    const result = OhMyShitMemoryConfigSchema.safeParse({})
+    expect(result.success).toBe(true)
+  })
+
+  test("enforces sampling interval bounds", () => {
+    const tooLow = OhMyShitMemoryConfigSchema.safeParse({ sampling_interval_ms: 100 })
+    const valid = OhMyShitMemoryConfigSchema.safeParse({ sampling_interval_ms: 1000 })
+    const tooHigh = OhMyShitMemoryConfigSchema.safeParse({ sampling_interval_ms: 20000 })
+
+    expect(tooLow.success).toBe(false)
+    expect(valid.success).toBe(true)
+    expect(tooHigh.success).toBe(false)
   })
 })
 
