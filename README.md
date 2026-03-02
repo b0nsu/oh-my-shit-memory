@@ -1,6 +1,10 @@
 # oh-my-shit-memory
 
+![oh-my-shit-memory constellation hero](assets/readme/constellation-hero.svg)
+
 `oh-my-shit-memory` is a focused fork of `oh-my-opencode` with Linux-first runtime incident instrumentation for build/test workflows.
+
+> A constellation for runtime incident intelligence.
 
 It captures:
 - runtime resource samples (RSS/VSZ/CPU/IO/threads/process tree)
@@ -15,6 +19,13 @@ This repository currently includes:
 - CI artifact upload and deduped incident issue flow
 - standalone runner + MCP scripts
 - stability fixes for flaky port-dependent tests
+
+## Constellation architecture
+
+![Constellation architecture map for config, hooks, runtime instrumentation, and incident outputs](assets/readme/constellation-system-map.svg)
+
+If you want to extend this README visual language, use the concept guide:
+- `docs/branding/constellation-readme-concept.md`
 
 ## Quick start
 
