@@ -1,7 +1,7 @@
 {
   "name": "oh-my-opencode",
   "version": "3.9.0",
-  "description": "The Best AI Agent Harness - Batteries-Included OpenCode Plugin with Multi-Model Orchestration, Parallel Background Agents, and Crafted LSP/AST Tools",
+  "description": "Focused oh-my-opencode fork with oh-my-shit-memory runtime incident instrumentation for build/test workflows",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -45,12 +45,12 @@
   "license": "SUL-1.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/code-yeongyu/oh-my-opencode.git"
+    "url": "git+https://github.com/b0nsu/oh-my-shit-memory.git"
   },
   "bugs": {
-    "url": "https://github.com/code-yeongyu/oh-my-opencode/issues"
+    "url": "https://github.com/b0nsu/oh-my-shit-memory/issues"
   },
-  "homepage": "https://github.com/code-yeongyu/oh-my-opencode#readme",
+  "homepage": "https://github.com/b0nsu/oh-my-shit-memory#readme",
   "dependencies": {
     "@ast-grep/cli": "^0.40.0",
     "@ast-grep/napi": "^0.40.0",
